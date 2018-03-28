@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>회원 가입</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+     <style>
+        input{
+            width :350px;
+        }
+        button{
+            width : 350px;
+        }
+    </style>
+</head>
+<body>
+     <center>
+        <div class="container">
+            <div class="panel-primary" style="margin-top : 150px;">
+                <div class="panel-heading">
+                    <h2>회원가입</h2>
+                </div>
+                <div class="panel-body">
+                    <form method="POST" id="bodyform" action="/join">
+                        <input name="joinid" placeholder="ID를 입력해주세요"><br>
+                        <input type="password" name="joinpass" placeholder="password를 입력해주세요"><br>
+                        <input type="password" name="joinpass_2" placeholder="password를 한번더 입력해주세요"><br>
+                        <button class="btn btn-danger" id="login">가입하기</button>
+                    </form>
+                </div>
+                <div class="panel-footer">
+                    <form action="/">
+                        <button class="btn btn-success">메인으로</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </center>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+
+    <title>로그인 화면</title>
+    <style>
+        input{
+            width :350px;
+        }
+        button{
+            width : 350px;
+        }
+    </style>
+    <script>
+        function TEST() {
+            $.ajax({
+                url : '/admindata',
+                type : 'POST',
+                success : function(data) {
+                    alert(data.data);
+                }
+             })
+        }
+    </script>
+</head>
+<body>
+    <center>
+            <div class="panel-primary">
+                <div class="panel-heading">
+                    <h2>로그인 화면</h2>
+                </div>
+                <div class="panel-body">
+                    <form method="POST" id="bodyform" action="/login">
+                        <input name="inputid" placeholder="ID를 입력해주세요"><br>
+                        <input type="password" name="inputpass" placeholder="password를 입력해주세요"><br>
+                        <button class="btn btn-danger" id="login">로그인</button>
+                    </form>
+                </div>
+                <div class="panel-footer">
+                    <form action="/joiner">
+                       <!-- <a href="/test">테스트페이지 이동</a>-->
+                        <button class="btn btn-success">회원가입하기</button>
+                    </form>
+                </div>
+            </div>
+    </center>
+</body>
+</html>

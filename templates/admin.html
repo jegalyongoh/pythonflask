@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="http://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
+    <meta charset="UTF-8">
+    <title>관리자 페이지</title>
+    <script>
+        $(document).ready(function () {
+           var table = $('#usertab').DataTable({
+                    "lengthMenu" : [ [ 3, 5, 10, -1 ], [ 3, 5, 10, "All" ]],
+                    "ajax" : {
+                        url : '/admindata',
+                        type : 'POST',
+                    },
+            });
+             $('#usertab tbody').on('click', 'tr', function () {
+                   var data = table.row( this ).data();
+                   $('#myModal').modal();
+                   if(data[2]=="일반회원"){
+                        data[2]=0
+                   }else{
+                        data[2]=1
+                   }
+                     $('#realusername').val(data[0]);
+                     $('#username').val(data[0]);
+                     $('#userpass').val(data[1]);
+                     $('#userad').val(data[2]);
+                });
+             var board=  $('#tables').DataTable({
+                    "lengthMenu" : [ [ 3, 5, 10, -1 ], [ 3, 5, 10, "All" ]],
+                    "ajax" : {
+                        url : '/adminboarddata',
+                        type : 'POST',
+                    }
+                });
+              $('#tables tbody').on('click', 'tr', function () {
+                   var boarddata = board.row( this ).data();
+                   $('#myModal2').modal();
+                     $('#realboardname').val(boarddata[0]);
+                     $('#boardname').val(boarddata[0]);
+                     $('#boardvalue').val(boarddata[1]);
+                     $('#boardid').val(boarddata[2]);
+                });
+        });
+        function upuser(){
+            var form= document.forms['userform'];
+            form.action='/updata_user';
+            form.submit()
+	    }
+	    function deluser(){
+            var form= document.forms['userform'];
+            form.action='/del_user';
+            form.submit()
+	    }
+
+	    function upboard(){
+            var form= document.forms['boardform'];
+            form.action='/updata_board';
+            form.submit()
+	    }
+	    function delboard(){
+            var form= document.forms['boardform'];
+            form.action='/del_board';
+            form.submit()
+	    }
+        function ck() {
+            window.history.back();
+        }
+    </script>
+</head>
+<body>
+    <center>
+        <div class="contalner">
+            <panel class="panel-default">
+                <div class="panel-heading">
+                    <button class="btn btn-danher btn btn pull-right" onclick="ck()">뒤로가기</button><br>
+                    <!-- <button class="btn btn-danher btn btn pull-right" onclick="ser()">리로드</button>-->
+                </div>
+                <div class="panel-heading">안녕하세요 {{ adminname }} 관리자님  </div>
+                <div class="panel-body">
+                      <ul class="nav nav-tabs">
+
+                        <li class="active"><a href="#tab1" data-toggle="tab">Home</a></li>
+
+                        <li><a href="#tab2" data-toggle="tab">회원관리</a></li>
+
+                        <li><a href="#tab3" data-toggle="tab">게시판관리</a></li>
+
+                       </ul>
+                    <div class="tab-content">
+                        <div class="tab-pane active" id= "tab1">
+                        </div>
+                        <div class="tab-pane" id="tab2">
+                        <table class="display" id="usertab" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <td style="width:40%">name</td>
+                                        <td style="width:40%">password</td>
+                                        <td style="width:20%">등급</td>
+                                    </tr>
+                                </thead>
+                        </table>
+                        </div>
+                        <div class="tab-pane" id="tab3">
+                             <table class="display" id="tables" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <td style="width:40%">제목</td>
+                                        <td style="width:40%">내용</td>
+                                        <td style="width:20%">id</td>
+                                    </tr>
+                                </thead>
+                             </table>
+                        </div>
+                     </div>
+
+                </div>
+                <div class="panel-footer">
+                    <h5>제작자 : 제갈용오</h5>
+                </div>
+            </panel>
+         </div>
+     </center>
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">삭제 / 수정</h4>
+        </div>
+         <form method="POST" name="userform">
+            <div class="modal-body">
+                    <input id="realusername" name="realusername" type="hidden"><br>
+                    <input id="username" name="username"><br>
+                    <input id="userpass" name="userpass"><br>
+                    <input id="userad" name="userad"> <h5>0 : 일반회원 1: 관리자</h5><br>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-default" onclick="deluser()" type="button">삭제하기</button>
+                <button class="btn btn-default" onclick="upuser()" type="button">수정하기</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </form>
+      </div>
+    </div>
+  </div>
+    <div class="modal fade" id="myModal2" role="dialog">
+            <div class="modal-dialog">
+              <!-- Modal content-->
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">삭제 / 수정</h4>
+                </div>
+                 <form method="POST" name="boardform">
+                    <div class="modal-body">
+                        <input id="realboardname" name="realboardname" type="hidden"><br>
+                        <input id="boardname" name="boardname"><br>
+                        <input id="boardvalue" name="boardvalue"><br>
+                        <input id="boardid" name="boardid">
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-default" onclick="delboard()" type="button">삭제하기</button>
+                        <button class="btn btn-default" onclick="upboard()" type="button">수정하기</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+              </div>
+            </div>
+  ```</div>
+</body>
+</html>

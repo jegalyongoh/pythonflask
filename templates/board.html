@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <meta charset="UTF-8">
+    <title>게시글</title>
+    <script>
+    function ck() {
+            window.history.back();
+        }
+    </script>
+</head>
+<body>
+    <div container>
+        <div class="panel-default">
+            <div class="panel-heading">
+                <button class="btn btn-danher btn btn pull-right" onclick="ck()">뒤로가기</button>
+                <center>
+                     <h1>{{ name }} 님의 게시글</h1>
+                </center>
+            </div>
+            <div class="panel-body">
+                <table class="table table-bordered">
+                    {% for a,b,c in boarddata %}
+                    <thead>
+                    <tr>
+                        <td>{{ a }}</td>
+                        <td>{{ c }}</td>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2"><center>{{ b }} </center> </td>
+                        </tr>
+                    </tbody>
+                    {% endfor %}
+                </table>
+            </div>
+            <div class="panel-footer">
+                <h5>제작자 : 제갈용오</h5>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
