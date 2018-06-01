@@ -1,19 +1,17 @@
-
-from flask import Flask, render_template, request, json
+﻿
+from flask import Flask, render_template, request, json, redirect, url_for, session
 import pymysql
 import datetime
 app = Flask(__name__)
-conn = pymysql.connect(host='127.0.0.1', port=3307, user="root", passwd='a1234', db="bucketlist")
+conn = pymysql.connect(host='127.0.0.1', port=3307, user="root", passwd='a1234', db="bucketlist", charset='utf8')
 cur = conn.cursor()
+app.secret_key = 'any random string'
 
 
 @app.route('/loaddate', methods=['GET', 'POST'])
 def loaddate():
     i=0
     date = datetime.datetime.now()
-    todayDatetime = "%s-%s-%s 00:00:00" % (date.year, date.month, date.day)
-    nexttime = "%s-%s-%s %d:00:00" % (date.year, date.month, date.day, i)
-    today = date.strftime('%Y-%m-%d %H:%M:%S')
     time = []
     while i <= 23:
         realtime = "%s-%s-%s %d:00:00" % (date.year, date.month, date.day, i)
@@ -30,7 +28,7 @@ def date():
     i = 30
     date = datetime.datetime.now()
     month = []
-    while i>=0:
+    while i >= 0:
         startday = date - datetime.timedelta(days=i)
         start = "%s-%s-%s 00:00:00" % (startday.year, startday.month, startday.day)
         end = "%s-%s-%s 23:59:59" % (startday.year, startday.month, startday.day)
@@ -60,6 +58,21 @@ def admindata():
         ]
         userdatadict.append(wish_dict)
     return json.dumps({'data': userdatadict})
+
+
+@app.route('/userlog', methods=['GET', 'POST'])
+def userlog():
+    _query = "SELECT * FROM tbl_date"
+    cur.execute(_query)
+    _data = cur.fetchall()
+    logdata = []
+    for a, b in _data:
+        wish_dict = [
+            a,
+            b
+        ]
+        logdata.append(wish_dict)
+    return json.dumps({'data': logdata})
 
 
 @app.route('/boarddata', methods=['GET', 'POST'])
@@ -124,7 +137,7 @@ def updata_user():
     query = "update user set user_id = '%s' , user_pass = '%s' , user_admin = %s where user_id='%s'" % (_user, _pass, _grade, _realuser)
     cur.execute(query)
     conn.commit()
-    return '<script>alert(\'성공\'); window.history.back();</script>'
+    return '<script>alert(\'수정 완료\'); window.history.back();</script>'
 
 
 @app.route('/del_board', methods=['POST'])
@@ -160,7 +173,7 @@ def createboard():
 
 
 @app.route('/admin/<username>')
-def mainpage(username):
+def adminpage(username):
     name=[]
     password=[]
     ad=[]
@@ -173,6 +186,14 @@ def mainpage(username):
     return render_template('admin.html', adminname=username, username=name, userpass=password, userad=ad)
 
 
+@app.route('/main/<user_trade>/<user_name>')
+def mainpage(user_name, user_trade):
+    if 'username' in session:
+        return render_template('main.html', name = user_name, trade = user_trade)
+    else:
+        return '<script>alert("세션이 없습니다."); location.href=\'/\'</script>'
+
+
 @app.route('/board/<board>')
 def board(board):
     cur.execute('SELECT * FROM board where board_title="%s"' % board)
@@ -180,10 +201,16 @@ def board(board):
     return render_template('board.html', boarddata=boarddata , name=board)
 
 
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('main'))
+
+
 @app.route('/login', methods=['POST'])
 def login():
 
-    _name = request.form['inputid']
+    _name = request.form['inputid']             # ****
     _pass = request.form['inputpass']
 
     if _name and _pass:
@@ -195,20 +222,22 @@ def login():
         if value >= 1:
             print("로그인 성공 : %s" % _name)
             print('로그인 정보 로드완료')
-            _trade = teee[0][2]
-            date=datetime.datetime.now()
+            _trade = teee[0][2]             # ****
+            date = datetime.datetime.now()
             nowDatetime = date.strftime('%Y-%m-%d %H:%M:%S')
             insquery="INSERT tbl_date values('%s','%s')" % (_name, nowDatetime)
             print(insquery)
             cur.execute(insquery)
+            session['username'] = _name
+
             conn.commit()
             print(nowDatetime)
-            return render_template('main.html', name=_name, trade=_trade, board=board)
+            return redirect(url_for('mainpage', user_name = _name, user_trade = _trade))
         else:
             print('로그인 실패')
             return '<script>alert("로그인 실패"); location.href=\'/\'</script>'
     else:
-        return '<script>alert("아이디와 비밀번호 둘다 입력해주세요); location.href=\'/\'</script>'
+        return '<script>alert("아이디와 비밀번호 둘다 입력해주세요"); location.href=\'/\'</script>'
 
 
 @app.route('/join', methods=['POST'])

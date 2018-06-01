@@ -16,13 +16,13 @@
         <div class="panel-default">
             <div class="panel-heading">
                 <button class="btn btn-danher btn btn pull-right" onclick="ck()">뒤로가기</button>
+                {% for a,b,c in boarddata %}
                 <center>
-                     <h1>{{ name }} 님의 게시글</h1>
+                     <h1>{{ c }} 님의 게시글</h1>
                 </center>
             </div>
             <div class="panel-body">
                 <table class="table table-bordered">
-                    {% for a,b,c in boarddata %}
                     <thead>
                     <tr>
                         <td>{{ a }}</td>
