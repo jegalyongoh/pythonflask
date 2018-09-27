@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
 
     <title>로그인 화면</title>
     <style>
@@ -15,16 +16,81 @@
         button{
             width : 350px;
         }
+        .panel-primary{
+            margin-top: 100px;
+            width: 80%
+        }
     </style>
     <script>
-        function TEST() {
-            $.ajax({
-                url : '/admindata',
-                type : 'POST',
-                success : function(data) {
-                    alert(data.data);
+        $(function(){
+            // 쿠키값을 가져온다.
+            var cookie_user_id = getLogin();
+
+
+            /*쿠키값이 존재하면 id에 쿠키에서 가져온 id를 할당한 뒤체크박스를 체크상태로 변경*/
+            if(cookie_user_id != "") {
+
+                $("#user_id").val(cookie_user_id);
+
+                $("#cb_saveId").attr("checked", true);
+
+            }
+            // 로그인 버튼 클릭시
+            $("#login").on("click", function(){
+
+                if($("#cb_saveId").is(":checked")){ // 저장 체크시
+
+                    saveLogin($("#user_id").val());
+
                 }
-             })
+                else{ // 체크 안되어있을때는 쿠키 초기화
+                    saveLogin("");
+                }
+            });
+        });
+
+        /* 로그인 정보 저장*/
+        function saveLogin(id) {
+            if(id != "") {
+                // userid 쿠키에 id 값을 7일간 저장
+                setSave("ID_cookie", id, 7);
+            }else{
+                // userid 쿠키 삭제
+                setSave("ID_cookie", id, -1);
+            }
+        }
+
+        /*Cookie에 user_id를 저장 */
+        function setSave(name, value, expiredays) {
+            var today = new Date();
+
+            today.setDate( today.getDate() + expiredays );
+
+            document.cookie = name + "=" + escape( value ) + "; path=/; expires=" + today.toGMTString() + ";"
+
+        }
+
+        /*쿠키값을 가져온다.*/
+        function getLogin() {
+            // userid 쿠키에서 id 값을 가져온다.
+
+            var cook = document.cookie + ";";
+
+            var idx = cook.indexOf("ID_cookie", 0);
+
+            var val = "";
+
+            if(idx != -1) {
+
+            cook = cook.substring(idx, cook.length);
+
+            begin = cook.indexOf("=", 0) + 1;
+
+            end = cook.indexOf(";", begin);
+
+            val = unescape(cook.substring(begin, end));
+            }
+            return val;
         }
     </script>
 </head>
@@ -36,9 +102,11 @@
                 </div>
                 <div class="panel-body">
                     <form method="POST" id="bodyform" action="/login">
-                        <input name="inputid" placeholder="ID를 입력해주세요"><br>
-                        <input type="password" name="inputpass" placeholder="password를 입력해주세요"><br>
+                        <input type="text" name="inputid" id="user_id" placeholder="ID를 입력해주세요"><br>
+                        <input type="password" name="inputpass" id="user_password" placeholder="password를 입력해주세요"><br>
+                        <input type="checkbox" id="cb_saveId" style="width:20px;"> 아이디 저장 <br>
                         <button class="btn btn-danger" id="login">로그인</button>
+                        
                     </form>
                 </div>
                 <div class="panel-footer">

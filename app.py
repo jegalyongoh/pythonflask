@@ -1,12 +1,11 @@
-﻿
-from flask import Flask, render_template, request, json, redirect, url_for, session
+﻿from flask import Flask, render_template, request, json, redirect, url_for, session
 import pymysql
 import datetime
+
 app = Flask(__name__)
 conn = pymysql.connect(host='127.0.0.1', port=3307, user="root", passwd='a1234', db="bucketlist", charset='utf8')
 cur = conn.cursor()
 app.secret_key = 'any random string'
-
 
 @app.route('/loaddate', methods=['GET', 'POST'])
 def loaddate():
@@ -62,7 +61,7 @@ def admindata():
 
 @app.route('/userlog', methods=['GET', 'POST'])
 def userlog():
-    _query = "SELECT * FROM tbl_date"
+    _query = "SELECT id,DATE_FORMAT(user_date, '%Y년%m월%d일 %h:%i:%s') FROM tbl_date ORDER BY user_date desc;"
     cur.execute(_query)
     _data = cur.fetchall()
     logdata = []
@@ -72,21 +71,21 @@ def userlog():
             b
         ]
         logdata.append(wish_dict)
-    return json.dumps({'data': logdata})
+    return json.dumps({'data': logdata}, sort_keys=False)
 
 
 @app.route('/boarddata', methods=['GET', 'POST'])
 def boarddata():
-    cur.execute('SELECT * FROM board')
+    cur.execute('SELECT * FROM board order by board_id DESC')
     boddata = cur.fetchall()
     boarddata = []
-    for a, b, c in boddata:
+    for id_,a, b, c in boddata:
         wish_dict = [
             a,
-            c
+            c,
+            id_
         ]
         boarddata.append(wish_dict)
-    print('게시판 로드완료')
     return json.dumps({'data': boarddata})
 
 
@@ -99,7 +98,10 @@ def adminboarddata():
 
 @app.route('/',  methods=['GET', 'POST'])
 def main():
-    return render_template('index.html')
+    if 'username' in session:
+        return redirect(url_for('mainpage'))
+    else:
+        return render_template('index.html')
 
 
 @app.route('/joiner', methods=['GET', 'POST'])
@@ -107,16 +109,15 @@ def showtest():
     return render_template('join.html')
 
 
-@app.route('/helloworld', methods=['GET', 'POST'])
+@app.route('/TEST', methods=['GET', 'POST'])
 def helloworld():
-    return render_template('student.html')
+    text = request.form['ir1']
+    return text + '<br><button onclick="location.href=/student>이동</button>'
 
 
-@app.route('/student', methods=['GET'])
+@app.route('/student')
 def student():
-    cur.execute('SELECT * FROM board')
-    data = cur.fetchall()
-    return render_template('student.html', data=data)
+    return render_template('sample.html')
 
 
 @app.route('/del_user', methods=['POST'])
@@ -143,7 +144,7 @@ def updata_user():
 @app.route('/del_board', methods=['POST'])
 def delboard():
     _board = request.form['realboardname']
-    query = "delete from board where board_title='%s'" % _board
+    query = "delete from board where board_id='%s'" % _board
     cur.execute(query)
     conn.commit()
     return '<script>alert(\'성공\'); window.history.back();</script>'
@@ -155,7 +156,7 @@ def updata_board():
     _bona = request.form['boardname']
     _bova = request.form['boardvalue']
     _boid = request.form['boardid']
-    query = "update board set board_title = '%s' , board_main = '%s' , board_user = '%s' where board_title='%s'" % (_bona, _bova, _boid, _realbo)
+    query = "update board set board_title = '%s' , board_main = '%s' , board_user = '%s' where board_id='%s'" % (_bona, _bova, _boid, _realbo)
     cur.execute(query)
     conn.commit()
     return '<script>alert(\'성공\'); window.history.back();</script>'
@@ -163,32 +164,40 @@ def updata_board():
 
 @app.route('/crate_board', methods=['GET', 'POST'])
 def createboard():
+    cur.execute('SELECT board_id from board ORDER BY board_id DESC LIMIT 1')
+    max_id = cur.fetchone()
+    board_number = int(max_id[0])+1
     _board_title = request.form['boardtitle']
     _board_main = request.form['boardmain']
     _board_id = request.form['boardid']
-    query = "insert into board values('%s','%s','%s')" % (_board_title, _board_main, _board_id)
-    cur.execute(query)
+    query = "insert into board values("+str(board_number)+",%s,%s,%s)"
+    cur.execute(query, (_board_title, _board_main, _board_id))
     conn.commit()
     return '<script>alert(\'성공\'); window.history.back();</script>'
 
 
-@app.route('/admin/<username>')
-def adminpage(username):
-    name=[]
-    password=[]
-    ad=[]
-    cur.execute('SELECT * FROM user')
-    userdata = cur.fetchall()
-    for a, b, c in userdata:
-        name.append(a)
-        password.append(b)
-        ad.append(c)
-    return render_template('admin.html', adminname=username, username=name, userpass=password, userad=ad)
+@app.route('/admin')
+def adminpage():
+    if 'username' in session and session['trade'] == 1:
+        username = session['username']
+        name=[]
+        password=[]
+        ad=[]
+        cur.execute('SELECT * FROM user')
+        userdata = cur.fetchall()
+        for a, b, c in userdata:
+            name.append(a)
+            password.append(b)
+            ad.append(c)
+        return render_template('admin.html', adminname=username, username=name, userpass=password, userad=ad)
+    else:
+        return '<script>alert("관리자만 사용이 가능합니다."); history.back()</script>'
 
-
-@app.route('/main/<user_trade>/<user_name>')
-def mainpage(user_name, user_trade):
+@app.route('/main')
+def mainpage():
     if 'username' in session:
+        user_name = session['username']
+        user_trade = session['trade']
         return render_template('main.html', name = user_name, trade = user_trade)
     else:
         return '<script>alert("세션이 없습니다."); location.href=\'/\'</script>'
@@ -196,14 +205,14 @@ def mainpage(user_name, user_trade):
 
 @app.route('/board/<board>')
 def board(board):
-    cur.execute('SELECT * FROM board where board_title="%s"' % board)
+    cur.execute('SELECT * FROM board where board_id="%s"' % board)
     boarddata = cur.fetchall()
-    return render_template('board.html', boarddata=boarddata , name=board)
+    return render_template('board.html', boarddata=boarddata)
 
 
 @app.route('/logout')
 def logout():
-    session.pop('username', None)
+    session.clear()
     return redirect(url_for('main'))
 
 
@@ -215,24 +224,21 @@ def login():
 
     if _name and _pass:
         query = "SELECT * FROM user where user_id=\'%s\' and user_pass=\'%s\'" % (_name, _pass)
-        cur.execute('SELECT * FROM board')
-        board = cur.fetchall()
         value = cur.execute(query)
         teee = cur.fetchall()
         if value >= 1:
-            print("로그인 성공 : %s" % _name)
+            print("유저 로그인  : %s" % _name)
             print('로그인 정보 로드완료')
             _trade = teee[0][2]             # ****
             date = datetime.datetime.now()
             nowDatetime = date.strftime('%Y-%m-%d %H:%M:%S')
             insquery="INSERT tbl_date values('%s','%s')" % (_name, nowDatetime)
-            print(insquery)
             cur.execute(insquery)
             session['username'] = _name
-
+            session['trade'] = _trade
             conn.commit()
             print(nowDatetime)
-            return redirect(url_for('mainpage', user_name = _name, user_trade = _trade))
+            return redirect(url_for('mainpage'))
         else:
             print('로그인 실패')
             return '<script>alert("로그인 실패"); location.href=\'/\'</script>'
@@ -271,5 +277,10 @@ def join():
             return '<script>alert("비밀번호가 서로 맞지않습니다 다시입력해주세요"); location.href="/joiner" </script>'
     else:
         return '<script>alert("아이디와 비밀번호 둘다 입력해주세요"); location.href="/joiner" </script>'
+@app.route('/angular')
+def angular():
+    return render_template('angular.html')
+
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
+    

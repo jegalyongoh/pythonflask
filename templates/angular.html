@@ -1,0 +1,87 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>angular.js</title>
+    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-animate.js"></script>
+    <script type="text/javascript">
+        var myApp = angular.module('myApp', []);
+        myApp.controller('MainCtrl', ['$scope', function ($scope) {
+            $scope.text = 'Hello, Angular fanatic.';
+            $scope.products = [];
+
+            $scope.addItem = function () {
+                $scope.products.push($scope.addMe);
+            }    
+            $scope.removeItem = function (x) {
+                $scope.products.splice(x, 1);
+            }
+    
+        }]);
+    </script>
+    <style>
+        .panel-header{
+            background-color: #EAEAEA
+        }
+        body{
+            margin: 0px auto;
+            text-align:center
+        }
+        #box {
+            transition: all linear 0.5s;
+            background-color: lightblue;
+            height: 100px;
+        }
+        
+        .ng-hide {
+            height: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel panel-header">
+        <h1>angular JS</h1>
+        <button onclick="location.href='/'" class="btn btn-danger"> 메인 </button>
+    </div>
+    <div class="panel panel-body">
+        <div ng-app="myApp">
+            <p>
+                <img src="/static/img/example.PNG">
+                <h3> TEXT 표현하기</h3>
+                {% raw %}
+                <div ng-controller="MainCtrl">
+                TEXT : {{ text }} 
+                <hr style="height:10px;">
+                {% endraw %}
+            </p>
+            <p>
+                <h3> 입력값 바인딩 </h3>
+                <p>Input: <input type="text" ng-model="name"></p>
+                <p ng-bind="name"></p>
+            </p>
+            <hr>
+            <p>
+                <h3>메모하기</h3>
+                <ol>
+                    <li ng-repeat="x in products">{{ '{{ x }}' }}
+                    <span ng-click="removeItem($index)"><button>X</button><br></span></li>
+                </ol>
+                <input ng-model="addMe">
+                <button ng-click="addItem()">Add</button>
+                <p>오늘 할일을 메모해보세요</p>
+            </p>
+            <hr>   
+            <p>
+                <h3>체크박스에 체크하면 사라집니다. <input type="checkbox" ng-model="myCheck"></h3>
+                <div ng-hide="myCheck" id="box"><h1>안녕하세요</h1></div>
+
+            </p>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-footer"></div>
+</body>
+</html>

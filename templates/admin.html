@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="http://cdn.datatables.net/1.10.16/css/jquery.dataTables.min.css">
     <meta charset="UTF-8">
     <title>관리자 페이지</title>
+    <style>
+        #boardvalue{
+            width: 80%;
+            height: 100px;
+        }
+        span {
+            width: 100px;
+        }
+    </style>
     <script>
         $(document).ready(function () {
            var table = $('#usertab').DataTable({
@@ -41,12 +50,13 @@
                    var boarddata = board.row( this ).data();
                    $('#myModal2').modal();
                      $('#realboardname').val(boarddata[0]);
-                     $('#boardname').val(boarddata[0]);
-                     $('#boardvalue').val(boarddata[1]);
-                     $('#boardid').val(boarddata[2]);
+                     $('#boardname').val(boarddata[1]);
+                     $('#boardvalue').val(boarddata[2]);
+                     $('#boardid').val(boarddata[3]);
                 });
              var log =  $('#logtable').DataTable({
                     "lengthMenu" : [ [ 3, 5, 10, -1 ], [ 3, 5, 10, "All" ]],
+                    "ordering" : false,
                     "ajax" : {
                         url : '/userlog',
                         type : 'POST',
@@ -107,7 +117,7 @@
                         <table class="display" id="usertab" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <td style="width:40%">name</td>
+                                        <td style="width:40%">ID</td>
                                         <td style="width:40%">password</td>
                                         <td style="width:20%">등급</td>
                                     </tr>
@@ -118,9 +128,10 @@
                              <table class="display" id="tables" style="width:100%">
                                 <thead>
                                     <tr>
-                                        <td style="width:40%">제목</td>
-                                        <td style="width:40%">내용</td>
-                                        <td style="width:20%">id</td>
+                                        <td style="width:20%;">번호</td>
+                                        <td style="width:20%;">제목</td>
+                                        <td style="width:50%;">내용</td>
+                                        <td style="width:10%;">작성자</td>
                                     </tr>
                                 </thead>
                              </table>
@@ -155,9 +166,9 @@
          <form method="POST" name="userform">
             <div class="modal-body">
                     <input id="realusername" name="realusername" type="hidden"><br>
-                    <input id="username" name="username"><br>
-                    <input id="userpass" name="userpass"><br>
-                    <input id="userad" name="userad"> <h5>0 : 일반회원 1: 관리자</h5><br>
+                    <span> ID : </span><input id="username" name="username"><br>
+                    <span> password : </span><input id="userpass" name="userpass"><br>
+                    <span> 등급 : </span><input id="userad" name="userad"> <h5>0 : 일반회원 1: 관리자</h5><br>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-default" onclick="deluser()" type="button">삭제하기</button>
@@ -178,9 +189,12 @@
                 </div>
                  <form method="POST" name="boardform">
                     <div class="modal-body">
-                        <input id="realboardname" name="realboardname" type="hidden"><br>
+                        <input id="realboardname" name="realboardname" type="hidden">
+                        <span>제목</span>
                         <input id="boardname" name="boardname"><br>
-                        <input id="boardvalue" name="boardvalue"><br>
+                        <h5>내용</h5>
+                        <textarea id="boardvalue" name="boardvalue"></textarea><br><br>
+                        <span>작성자</span>
                         <input id="boardid" name="boardid">
                     </div>
                     <div class="modal-footer">
